@@ -1,15 +1,26 @@
-sudo: false
+
+sudo: required
 language: java
-install: mvn install -DskipTests=true
-script: mvn test
+
 jdk:
   - oraclejdk8
-notifications:
-  webhooks:
-    urls:
-      - "https://webhooks.gitter.im/e/ec3127975d8a2b8f11d0"
-    on_success: always  # options: [always|never|change] default: always
-    on_failure: always  # options: [always|never|change] default: always
-after_success:
-  - mvn test jacoco:report coveralls:report
-# http://lint.travis-ci.org/ validator
+
+
+script:
+  - mvn clean cobertura:cobertura -Dtest=CloneVisitorTest#cloneAnnotationOnWildcardTypeArgument -DfailIfNoTests=false
+
+before_deploy:
+- tar -zcvf coverage-result.tar.gz /home/travis/build/leusonmario/javaparser/target/site/cobertura
+
+deploy:
+  provider: releases
+  api_key:
+    secure: "mOFd9Tdx4cSi+PWVk0QI6odduCLoTOpbjRyGhRDZqQesz7rFv1PBtNBVu5jtw87aTGRFF24vUqQPqH+YvCXxPNqa4IbWKSOH1Cc1ZyziUTrsiBOXPA9BLjaVTyW0LxqCVqsm8Pq3TMauS+J4grOwuHz8pwfXMlny6LX/xjavyJRgQD+SobxYlks9Q1lLzKaLoOAhoVQkVAUBh8cgW9MtvDWmKOrlonHIs3KJCV8hpwUYLmJA+Al1CxdXnJaBHds0vK3adhX6EcUun1MWDLnhJyHp9hgGR2m0s/a9yJ8R3uQo5MZDT2SYw5n+2TOt1LIrMlkKnPEa3y4TqCOkmyrS5wOgqRg6OSBye8OhBudKdUmm6kfCpK7BhJBBTtVyoJaS8OHlYYjX5BcYFmoXhXPIifN89d1z7WkSiFRukjTKI/Swp2uzyCPd7WTLIB2oLNsbeU3C6bcIQaIl0cI4l6FyaSAvEEdVWs0IO0hccxdjET//w1Kpr/5TtAB1vjYhNbqDyjkBl92LyHZ/w8enq6T+I6Lef/zKCOWjPX/WSzOK0/3C/mFbDd2bzEgDZkbn15ryuioupPZsOXw3ln8Je0C40R8jLRomWHYBcp/KtTOLxBykgN5kYKch/lbjI/6axWOfaAF6NL8SGpapkFHWhNaCAWZudQ+MXI2dJsQbDpyubFE="
+
+
+  file: coverage-result.tar.gz
+  file_glob: true
+  overwrite: true
+  skip_cleanup: true
+  on:
+    tags: true
